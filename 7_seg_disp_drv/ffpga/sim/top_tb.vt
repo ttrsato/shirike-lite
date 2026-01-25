@@ -1,0 +1,274 @@
+// Custom testbench
+
+`timescale 1ns / 1ps
+
+module sn74hc595
+  (
+   input  xsrclr,
+   input  srclk,
+   input  ser,
+   input  rclk,
+   input  xoe,
+   output qa,
+   output qb,
+   output qc,
+   output qd,
+   output qe,
+   output qf,
+   output qg,
+   output qh,
+   output qhd
+   );
+
+  reg [7:0] sr;
+  reg [7:0] lr;
+  assign {qh, qg, qf, qe, qd, qc, qb, qa} = (xoe) ? 8'bzzzz_zzzz : lr;
+  assign qhd = sr[7];
+  
+  always @(posedge srclk, negedge xsrclr) begin
+    if (!xsrclr)
+      sr <= 8'd0;
+    else
+      sr <= {sr[6:0], ser};
+  end
+  
+  always @(posedge rclk)
+    lr <= sr;
+
+endmodule
+
+module bram
+  (
+   input  [1:0] BRAM_RATIO,
+   input  [7:0] BRAM_WDATA,
+   input        BRAM_nWEN,
+   input        BRAM_nWRITE_CLK,
+   input        BRAM_nWCLKEN,
+   input  [8:0] BRAM_WADDR,
+   input        BRAM_nREN,
+   input        BRAM_nREAD_CLK,
+   input        BRAM_nRCLKEN,
+   input  [8:0] BRAM_RADDR,
+   output [7:0] BRAM_RDATA
+   );
+
+  reg [7:0] mem [0:511];
+  reg [7:0] mem_out;
+
+  always @(posedge BRAM_nWRITE_CLK) begin
+    if (!BRAM_nWEN && !BRAM_nWCLKEN) begin
+      mem[BRAM_WADDR] <= BRAM_WDATA;
+    end
+  end
+
+  always @(posedge BRAM_nREAD_CLK) begin
+    if (!BRAM_nREN && !BRAM_nRCLKEN) begin
+      mem_out <= mem[BRAM_RADDR];
+    end
+  end
+
+  assign BRAM_RDATA = mem_out;
+
+endmodule
+
+module top_tb;
+
+  reg        clk;
+  reg        rst_n;
+  wire       clk_en;
+  // COM
+  wire       com_ser;
+  wire       com_srclk;
+  wire       com_rclk;
+  wire       com_oe;
+  wire       v_sync;
+  // SEG
+  wire       seg_ser;
+  wire       seg_srclk;
+  wire       seg_rclk;
+  wire       seg_oe;
+  wire       dig1, dig2, dig3, dig4, dig5, dig6;
+  wire       seg_a, seg_b, seg_c, seg_d, seg_e, seg_f, seg_g, seg_h;
+  // SPI
+  reg        spi_ss_n;
+  reg        spi_sck;
+  reg        spi_mosi;
+  wire       spi_miso;
+  wire       spi_miso_o;
+  wire       spi_miso_en;
+  reg [15:0] rdata;
+  // BRAM
+  wire [1:0] BRAM0_RATIO;
+  wire [7:0] BRAM0_WDATA;
+  wire       BRAM0_nWEN;
+  wire       BRAM0_nWRITE_CLK;
+  wire       BRAM0_nWCLKEN;
+  wire [8:0] BRAM0_WADDR;
+  wire       BRAM0_nREN;
+  wire       BRAM0_nREAD_CLK;
+  wire       BRAM0_nRCLKEN;
+  wire [8:0] BRAM0_RADDR;
+  wire [7:0] BRAM0_RDATA;
+  
+  parameter SPI_CLK_PERIOD2 = 500; // 1MHz
+  task spi_txrx;
+    input [15:0] wdata;
+    integer i;
+    begin
+      spi_ss_n = 1'b0;
+      spi_sck  = 1'b0;
+      spi_mosi = 1'b0;
+      #(SPI_CLK_PERIOD2);
+      for (i = 0; i < 16; i = i + 1) begin
+        spi_sck  = 1'b0;
+        spi_mosi = wdata[15 - i];
+        #(SPI_CLK_PERIOD2);
+        spi_sck  = 1'b1;
+        rdata[15 - i] = spi_miso;
+        #(SPI_CLK_PERIOD2);
+      end
+      spi_sck  = 1'b0;
+      spi_mosi = 1'b0;
+      #(SPI_CLK_PERIOD2);
+      spi_ss_n = 1'b1;
+      #(SPI_CLK_PERIOD2);
+    end
+  endtask
+
+  sn74hc595 u_com
+    (
+     .xsrclr( rst_n     ),
+     .srclk ( com_srclk ),
+     .ser   ( com_ser   ),
+     .rclk  ( com_rclk  ),
+     .xoe   ( 1'b0      ),
+     .qa    ( dig1      ),
+     .qb    ( dig2      ),
+     .qc    ( dig3      ),
+     .qd    ( dig4      ),
+     .qe    ( dig5      ),
+     .qf    ( dig6      ),
+     .qg    (),
+     .qh    (),
+     .qhd   ()
+     );
+  
+  sn74hc595 u_seg
+    (
+     .xsrclr( rst_n     ),
+     .srclk ( seg_srclk ),
+     .ser   ( seg_ser   ),
+     .rclk  ( seg_rclk  ),
+     .xoe   ( 1'b0      ),
+     .qa    ( seg_a     ),
+     .qb    ( seg_b     ),
+     .qc    ( seg_c     ),
+     .qd    ( seg_d     ),
+     .qe    ( seg_e     ),
+     .qf    ( seg_f     ),
+     .qg    ( seg_g     ),
+     .qh    ( seg_h     ),
+     .qhd   ()
+     );
+  
+  bram u_bram0
+    (
+     .BRAM_RATIO      ( BRAM0_RATIO      ),
+     .BRAM_WDATA      ( BRAM0_WDATA      ),
+     .BRAM_nWEN       ( BRAM0_nWEN       ),
+     .BRAM_nWRITE_CLK ( BRAM0_nWRITE_CLK ),
+     .BRAM_nWCLKEN    ( BRAM0_nWCLKEN    ),
+     .BRAM_WADDR      ( BRAM0_WADDR      ),
+     .BRAM_nREN       ( BRAM0_nREN       ),
+     .BRAM_nREAD_CLK  ( BRAM0_nREAD_CLK  ),
+     .BRAM_nRCLKEN    ( BRAM0_nRCLKEN    ),
+     .BRAM_RADDR      ( BRAM0_RADDR      ),
+     .BRAM_RDATA      ( BRAM0_RDATA      )
+     );
+
+  top u_dut
+    (
+     .clk              ( clk              ),
+     .rst_n            ( rst_n            ),
+     .clk_en           ( clk_en           ),
+     .com_ser          ( com_ser          ),
+     .com_srclk        ( com_srclk        ),
+     .com_rclk         ( com_rclk         ),
+     .seg_ser          ( seg_ser          ),
+     .seg_srclk        ( seg_srclk        ),
+     .seg_rclk         ( seg_rclk         ),
+     .v_sync           ( v_sync           ),
+     .seg_ser_oe       (                  ),
+     .seg_srclk_oe     (                  ),
+     .seg_rclk_oe      (                  ),
+     .com_ser_oe       (                  ),
+     .com_srclk_oe     (                  ),
+     .com_rclk_oe      (                  ),
+     .v_sync_oe        (                  ),
+     .spi_ss_n         ( spi_ss_n         ),
+     .spi_sck          ( spi_sck          ),
+     .spi_mosi         ( spi_mosi         ),
+     .spi_miso         ( spi_miso_o       ),
+     .spi_miso_en      ( spi_miso_en      ),
+     .BRAM0_RATIO      ( BRAM0_RATIO      ),
+     .BRAM0_WDATA      ( BRAM0_WDATA      ),
+     .BRAM0_nWEN       ( BRAM0_nWEN       ),
+     .BRAM0_nWRITE_CLK ( BRAM0_nWRITE_CLK ),
+     .BRAM0_nWCLKEN    ( BRAM0_nWCLKEN    ),
+     .BRAM0_WADDR      ( BRAM0_WADDR      ),
+     .BRAM0_nREN       ( BRAM0_nREN       ),
+     .BRAM0_nREAD_CLK  ( BRAM0_nREAD_CLK  ),
+     .BRAM0_nRCLKEN    ( BRAM0_nRCLKEN    ),
+     .BRAM0_RADDR      ( BRAM0_RADDR      ),
+     .BRAM0_RDATA      ( BRAM0_RDATA      )
+     );
+  
+  // miso tri-state buffer
+  bufif1 (spi_miso, spi_miso_o, spi_miso_en);
+  
+  // OSC behavior
+  always begin
+    clk = ~clk;
+    #10;
+  end
+
+  initial begin
+    // VCD setup
+    $dumpfile ("top_tb.vcd");
+    $dumpvars (0, top_tb);
+    
+    // Init SPI
+    spi_ss_n = 1;
+    spi_sck  = 0;
+    spi_mosi = 0;
+    
+    // Init sys
+    rst_n = 0;
+    clk   = 0;
+    #5;
+    rst_n = 1;
+    
+    #100;
+
+    //repeat (4) @(negedge v_sync);
+    #100;
+
+    spi_txrx(16'h0001);
+    #5000;
+    spi_txrx(16'h0102);
+    #5000;
+    spi_txrx(16'h0203);
+    #5000;
+    spi_txrx(16'h0304);
+    #5000;
+    spi_txrx(16'h0405);
+    #5000;
+    spi_txrx(16'h0506);
+
+    #50_000_000;
+    #50_000_000;
+
+    $finish;
+  end
+
+endmodule
