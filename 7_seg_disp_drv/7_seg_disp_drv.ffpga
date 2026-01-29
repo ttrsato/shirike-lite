@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GPDProject version="40" oldestCompatibleVersion="32" GPDVersion="6.52.001" lastChange="24 Jan 2026 20:55:52" projectChecksumState="1" projectChecksum="53187301">
+<GPDProject version="40" oldestCompatibleVersion="32" GPDVersion="6.52.001" lastChange="30 Jan 2026 00:34:26" projectChecksumState="1" projectChecksum="cc1483f9">
     <generalProjectSettings/>
     <chip family="04" type="06" friendlyName="FFPGA" partNumber="67" package="26">
         <nvmData registerLenght="480">0 0 0 28 0 0 0 0 A5 A5 A5 A5 0 0 0 0 0 0 0 0 5A 5A 5A 5A 2 0 0 0 22 22 22 22 22 22 22 22 22 22 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</nvmData>
@@ -800,40 +800,40 @@
                     <port-name>rst_n</port-name>
                 </record>
                 <record id="IOB_t[0:0]_xy[31:22]_out0">
-                    <port-name>com_rclk</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:22]_out1">
-                    <port-name>com_rclk_oe</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:23]_out0">
                     <port-name>com_oe</port-name>
                 </record>
-                <record id="IOB_t[0:0]_xy[31:23]_out1">
+                <record id="IOB_t[0:0]_xy[31:22]_out1">
                     <port-name>com_oe_oe</port-name>
                 </record>
+                <record id="IOB_t[0:0]_xy[31:23]_out0">
+                    <port-name>com_rclk</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:23]_out1">
+                    <port-name>com_rclk_oe</port-name>
+                </record>
                 <record id="IOB_t[0:0]_xy[31:24]_out0">
-                    <port-name>seg_ser</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:24]_out1">
-                    <port-name>seg_ser_oe</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:25]_out0">
                     <port-name>seg_srclk</port-name>
                 </record>
-                <record id="IOB_t[0:0]_xy[31:25]_out1">
+                <record id="IOB_t[0:0]_xy[31:24]_out1">
                     <port-name>seg_srclk_oe</port-name>
                 </record>
+                <record id="IOB_t[0:0]_xy[31:25]_out0">
+                    <port-name>seg_ser</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:25]_out1">
+                    <port-name>seg_ser_oe</port-name>
+                </record>
                 <record id="IOB_t[0:0]_xy[31:26]_out0">
-                    <port-name>seg_rclk</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:26]_out1">
-                    <port-name>seg_rclk_oe</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:27]_out0">
                     <port-name>seg_oe</port-name>
                 </record>
-                <record id="IOB_t[0:0]_xy[31:27]_out1">
+                <record id="IOB_t[0:0]_xy[31:26]_out1">
                     <port-name>seg_oe_oe</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:27]_out0">
+                    <port-name>seg_rclk</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:27]_out1">
+                    <port-name>seg_rclk_oe</port-name>
                 </record>
                 <record id="IOB_t[0:0]_xy[31:5]_out0">
                     <port-name>v_sync</port-name>
@@ -842,16 +842,16 @@
                     <port-name>v_sync_oe</port-name>
                 </record>
                 <record id="IOB_t[0:0]_xy[31:8]_out0">
-                    <port-name>com_ser</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:8]_out1">
-                    <port-name>com_ser_oe</port-name>
-                </record>
-                <record id="IOB_t[0:0]_xy[31:9]_out0">
                     <port-name>com_srclk</port-name>
                 </record>
-                <record id="IOB_t[0:0]_xy[31:9]_out1">
+                <record id="IOB_t[0:0]_xy[31:8]_out1">
                     <port-name>com_srclk_oe</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:9]_out0">
+                    <port-name>com_ser</port-name>
+                </record>
+                <record id="IOB_t[0:0]_xy[31:9]_out1">
+                    <port-name>com_ser_oe</port-name>
                 </record>
                 <record id="IOB_t[0:0]_xy[3:30]_out0">
                     <port-name>BRAM0_WADDR[4]</port-name>
