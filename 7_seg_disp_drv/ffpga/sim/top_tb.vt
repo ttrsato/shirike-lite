@@ -249,8 +249,7 @@ module top_tb;
     rst_n = 1;
     
     #100;
-
-    //repeat (4) @(negedge v_sync);
+    repeat (3) @(negedge v_sync);
     #100;
 
     spi_txrx(16'h0001);
