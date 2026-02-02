@@ -6,8 +6,46 @@ import seg_digit as sd
 from machine import Pin
 import _thread, time, micropython
 
-# 割り込み処理中の例外を作成するための設定です
+######################
+# Global variables
+
+DISP_WAIT = 0.1
+update_flag = False
+dm = DispMultiSeg()
+
+
+######################
+# FPGA initialize
+shrike.reset()
+shrike.flash("FPGA_bitstream_MCU.bin") 
+
+
+######################
+# Interrupt settings
+
+# Extend exception buffer
 micropython.alloc_emergency_exception_buf(100)
+
+def update_disp():
+  global update_flag
+  update_flag = True
+
+# Interrupt handler
+def VsyncTrig( pin ):
+    global update_flag
+    state = machine.disable_irq()
+    if update_flag:
+      update_flag = False
+      dm.disp_update_digit_all()
+    machine.enable_irq(state)
+
+# v_sync interrupt pin setting
+v_sync = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
+v_sync.irq(trigger=Pin.IRQ_FALLING,  handler=VsyncTrig)
+
+
+######################
+# Function
 
 def pos_dig(x, y):
   dig = int(x/3)
@@ -23,35 +61,9 @@ def pos_dig(x, y):
     seg = sd.S_D
   return dig, seg
 
-###
-update_flag = False
-
-def update_disp():
-  global update_flag
-  update_flag = True
-
-
-def VsyncTrig( pin ):
-    global update_flag
-    state = machine.disable_irq()
-    if update_flag:
-      update_flag = False
-      dm.disp_update_digit_all()
-    machine.enable_irq(state)
-
-# v_sync interrupt pin setting
-v_sync = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
-v_sync.irq(trigger=Pin.IRQ_FALLING,  handler=VsyncTrig)
-        
 
 ######################
-# FPGA initialize
-shrike.reset()
-shrike.flash("FPGA_bitstream_MCU.bin") 
-
-DISP_WAIT = 0.1
-
-dm = DispMultiSeg()
+# Main loop
 
 while True:
 

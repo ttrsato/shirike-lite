@@ -4,6 +4,23 @@ import shrike
 from disp_multi_seg import DispMultiSeg
 import seg_digit as sd
 
+######################
+# Global variables
+
+DISP_WAIT = 0.1
+dm = DispMultiSeg()
+
+
+######################
+# FPGA initialize
+
+shrike.reset()
+shrike.flash("FPGA_bitstream_MCU.bin") 
+
+
+######################
+# Function
+
 def pos_dig(x, y):
   dig = int(x/3)
   if (y == 0):
@@ -18,14 +35,9 @@ def pos_dig(x, y):
     seg = sd.S_D
   return dig, seg
 
+
 ######################
-# FPGA initialize
-shrike.reset()
-shrike.flash("FPGA_bitstream_MCU.bin") 
-
-DISP_WAIT = 0.1
-
-dm = DispMultiSeg()
+# Main loop
 
 while True:
 
